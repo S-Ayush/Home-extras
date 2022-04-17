@@ -1,0 +1,236 @@
+import { memo, useEffect, useState } from "react";
+
+import Overlay from "../../components/ui/overlay";
+import Portal from "../../components/ui/portal";
+import Input from "../../components/ui/input";
+import Button from "../../components/ui/button";
+import { toast } from "react-toastify";
+import { addNewHome } from "../../framework/rest-api/actions";
+
+function HomeAddForm({ onAdd, onClose, show }) {
+  const [coverImg, setCoverImg] = useState(null);
+  const [loadStatus, setLoadStatus] = useState(false);
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    location: "",
+    price: "",
+    extras: { free: [], paid: [] },
+  });
+
+  const resetValues = () => {
+    setCoverImg(null);
+    setLoadStatus(false);
+  };
+
+  useEffect(() => {
+    document.body.style.overflow = show ? "hidden" : "initial";
+    return () => resetValues();
+  }, [show]);
+
+  const onCoverUpload = (e) => {
+    setCoverImg(e.target.files[0]);
+  };
+
+  const handelInputChange = (e) => {
+    let _formData = { ...formData, [e.target.name]: e.target.value };
+    setFormData(_formData);
+  };
+
+  const handleCheckBoxChange = (e) => {
+    if (e.target.checked) {
+      let _extras = { ...formData.extras };
+      _extras[e.target.name].push(e.target.value);
+      let _formData = { ...formData, extras: _extras };
+      setFormData(_formData);
+    } else {
+      let _extras = { ...formData.extras };
+      const index = _extras[e.target.name].findIndex(
+        (item) => item === e.target.value
+      );
+      _extras[e.target.name].splice(index, 1);
+      let _formData = { ...formData, extras: _extras };
+      setFormData(_formData);
+    }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (!formData.title || formData.title.length < 3) {
+      toast.error("Enter valid home title");
+      return;
+    }
+    if (!formData.description || formData.description.length < 20) {
+      toast.error(
+        "Home Description length should be greater than 20 characters"
+      );
+      return;
+    }
+    if (!formData.location || formData.location.length < 3) {
+      toast.error("Enter valid home location");
+      return;
+    }
+    if (!formData.price || formData.price < 3) {
+      toast.error("Enter valid home Price");
+      return;
+    }
+
+    if (!coverImg) {
+      toast.error("Please upload Home image.");
+      return;
+    }
+
+    setLoadStatus(true);
+    const _formData = new FormData();
+    _formData.append("media", coverImg);
+    _formData.append("title", formData.title);
+    _formData.append("title", formData.description);
+    _formData.append("title", formData.location);
+    _formData.append("title", formData.price);
+    _formData.append("title", formData.extras);
+    console.log(_formData);
+
+    addNewHome(formData)
+      .then((res) => {
+        onAdd(res.data);
+        onClose();
+      })
+      .catch((ex) => toast.error(ex.response?.data || ex.message));
+  };
+
+  return (
+    <>
+      <Overlay show={show} onClick={onClose} />
+      <Portal isOpen={show}>
+        <div className="add-home-form">
+          <form onSubmit={handleSubmit}>
+            <label
+              className="home-cover-input-label"
+              htmlFor="home-cover-input"
+            >
+              {!coverImg && <span>Click to upload Home Image</span>}
+
+              {coverImg && (
+                <>
+                  <img
+                    alt="Uploaded cover"
+                    className="uploaded-cover-img"
+                    src={URL.createObjectURL(coverImg)}
+                  />
+                </>
+              )}
+            </label>
+
+            <Input
+              id="home-cover-input"
+              type="file"
+              accept="image/*"
+              className="home-cover-input"
+              onChange={onCoverUpload}
+            />
+
+            <Input
+              name="title"
+              placeholder="Please Add Home Title"
+              onChange={handelInputChange}
+            />
+            <textarea
+              name="description"
+              placeholder="Please Add Home Description"
+              rows={6}
+              onChange={handelInputChange}
+            />
+            <Input
+              name="location"
+              placeholder="Please Add Home Location"
+              onChange={handelInputChange}
+            />
+            <Input
+              name="price"
+              placeholder="Please Add Home Price"
+              onChange={handelInputChange}
+            />
+            <div className="extras">
+              <h3>Extras</h3>
+              <div className="free">
+                <h4>Free</h4>
+                <div className="selectItem">
+                  <div>
+                    <input
+                      type="checkbox"
+                      name="free"
+                      value="tv"
+                      id="free-tv"
+                      onChange={handleCheckBoxChange}
+                    />
+                    <label htmlFor="free-tv">Tv</label>
+                  </div>
+                  <div>
+                    <input
+                      type="checkbox"
+                      name="free"
+                      value="fridge"
+                      id="free-fridge"
+                      onChange={handleCheckBoxChange}
+                    />
+                    <label htmlFor="free-fridge">Fridge</label>
+                  </div>
+                  <div>
+                    <input
+                      type="checkbox"
+                      name="free"
+                      value="ac"
+                      id="free-ac"
+                      onChange={handleCheckBoxChange}
+                    />
+                    <label htmlFor="free-ac">A.c</label>
+                  </div>
+                </div>
+              </div>
+              <div className="paid">
+                <h4>paid</h4>
+                <div className="selectItem">
+                  <div>
+                    <input
+                      type="checkbox"
+                      name="paid"
+                      value="tv"
+                      id="paid-tv"
+                      onChange={handleCheckBoxChange}
+                    />
+                    <label htmlFor="paid-tv">Tv</label>
+                  </div>
+                  <div>
+                    <input
+                      type="checkbox"
+                      name="paid"
+                      value="fridge"
+                      id="paid-fridge"
+                      onChange={handleCheckBoxChange}
+                    />
+                    <label htmlFor="paid">Fridge</label>
+                  </div>
+                  <div>
+                    <input
+                      type="checkbox"
+                      name="paid"
+                      value="ac"
+                      id="paid-ac"
+                      onChange={handleCheckBoxChange}
+                    />
+                    <label htmlFor="paid">A.c</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style={{ flex: 1 }} />
+            <Button disabled={loadStatus}>Add</Button>
+          </form>
+        </div>
+      </Portal>
+    </>
+  );
+}
+
+export default memo(HomeAddForm);

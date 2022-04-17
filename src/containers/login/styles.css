@@ -1,0 +1,33 @@
+.auth-wrapper {
+  height: 100vh;
+}
+
+.auth-bg {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  position: absolute;
+}
+
+.auth-form {
+  background-color: #fff;
+  border-radius: 5px;
+  left: 15%;
+  max-width: 400px;
+  padding: 50px 50px 100px;
+  position: relative;
+  top: 50%;
+  width: 90%;
+  transform: translateY(-50%);
+  z-index: 3;
+}
+
+.auth-form > h4 {
+  font-size: 18px;
+  margin-bottom: 50px;
+}
+
+.auth-form > a {
+  display: block;
+  margin-top: 30px;
+}
